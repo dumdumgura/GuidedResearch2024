@@ -76,7 +76,7 @@ class TPVAggregator(nn.Module):
 
 class TPVDecoder(nn.Module):
     def __init__(
-            self,nbr_classes=20,
+            self,nbr_classes=40,
             in_dims=64, hidden_dims=128, out_dims=None, use_checkpoint=True
     ):
         super().__init__()
@@ -96,5 +96,7 @@ class TPVDecoder(nn.Module):
     def forward(self, fused):
             fused = self.decoder(fused)
             logits = self.classifier(fused)
+            #softmax_outputs = torch.nn.functional.softmax(logits, dim=1)
+
             #logits = logits.permute(0, 2, 1)
             return logits

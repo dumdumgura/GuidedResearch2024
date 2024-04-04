@@ -14,7 +14,7 @@ class Trimamba(nn.Module):
         self.nbr_classes = nbr_classes
         self.eps = eps
         self.attentionblock_config = AttentionBlockConfig(embed_dim=embed_dim)
-        self.attentionstack_config = AttentionStackConfig(block=self.attentionblock_config)
+        self.attentionstack_config = AttentionStackConfig(block=self.attentionblock_config,n_layer=4)
 
         self.projection = Projection(R, in_channels, mid_channels, eps=eps)
         self.S2S_model = AttentionStack(self.attentionstack_config)
@@ -23,8 +23,8 @@ class Trimamba(nn.Module):
 
     def forward(self, input_pc):
         B, _, Np = input_pc.shape
-        features = input_pc[:, :-3, :]
-        coords = input_pc[:, -3:, :]
+        features = input_pc[:, -3:, :]
+        coords = input_pc[:, :-3, :]
 
         dev = features.device
         norm_coords = coords - coords.mean(dim=2, keepdim=True)
@@ -62,10 +62,13 @@ class Trimamba(nn.Module):
         triplane_feat = triplane_feat.permute(0, 1, 3, 2).contiguous()
         tpv_list = [triplane_feat[..., 0], triplane_feat[..., 1], triplane_feat[..., 2]]
 
-        tpv_feat_pts = self.TPVagg(tpv_list, norm_coords.reshape(B, Np, 3))
-        point_logits = self.decoder(tpv_feat_pts)
+        tpv_feat_pts = self.TPVagg(tpv_list, norm_coords.reshape(B, Np, 3)) #B,Np,C_proj
 
-        return point_logits
+        # for classification:
+        tpv_feat_global,_ = torch.max(tpv_feat_pts, dim=1) # B,C_proj
+        shape_logits = self.decoder(tpv_feat_global)
+
+        return shape_logits
 
 
 # Test the model
