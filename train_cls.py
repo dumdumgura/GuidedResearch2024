@@ -2,6 +2,7 @@
 Author: Benny
 Date: Nov 2019
 """
+
 from dataset.modelnet40_dataset import ModelNetDataLoader
 from  model.trimamba import  Trimamba
 import numpy as np
@@ -62,7 +63,7 @@ def main(args):
     test_data_loader = torch.utils.data.DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False,
                                                    num_workers=0)
 
-    '''MODEL LOADING'''
+    '''MODEL LOADINGG'''
     args.num_class = 40
     args.input_dim = 6 if args.normal else 3
     #shutil.copy(hydra.utils.to_absolute_path('models/{}/model.py'.format(args.model.name)), '.')
